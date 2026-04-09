@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
 public class Movie {
     private final IntegerProperty id = new SimpleIntegerProperty();
     private final StringProperty title = new SimpleStringProperty("");
@@ -26,6 +25,8 @@ public class Movie {
     private final ObjectProperty<List<String>> genres = new SimpleObjectProperty<>(new ArrayList<>());
     private final ObjectProperty<List<String>> actors = new SimpleObjectProperty<>(new ArrayList<>());
     private final ObjectProperty<WatchStatus> watchStatus = new SimpleObjectProperty<>(WatchStatus.VIL_HORFA);
+    private final StringProperty backdropUrl = new SimpleStringProperty("");
+    private final StringProperty youtubeTrailerKey = new SimpleStringProperty("");
 
     public Movie() {
     }
@@ -169,6 +170,30 @@ public class Movie {
 
     public ObjectProperty<WatchStatus> watchStatusProperty() {
         return watchStatus;
+    }
+
+    public String getBackdropUrl() {
+        return backdropUrl.get();
+    }
+
+    public void setBackdropUrl(String value) {
+        backdropUrl.set(value == null ? "" : value);
+    }
+
+    public StringProperty backdropUrlProperty() {
+        return backdropUrl;
+    }
+
+    public String getYoutubeTrailerKey() {
+        return youtubeTrailerKey.get();
+    }
+
+    public void setYoutubeTrailerKey(String value) {
+        youtubeTrailerKey.set(value == null ? "" : value);
+    }
+
+    public StringProperty youtubeTrailerKeyProperty() {
+        return youtubeTrailerKey;
     }
 
     public boolean isOnWatchlist(List<Movie> watchlist) {

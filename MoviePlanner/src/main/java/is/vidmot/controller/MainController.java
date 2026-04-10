@@ -12,6 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -34,118 +35,210 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Stýrir aðalviðmóti Movie Planner forritsins.
+ * Controllerinn sér um leit, birtingu vinsælla mynda, watchlist,
+ * nánari upplýsingar um myndir og opnun á YouTube sýnishornum.
+ */
 public class MainController {
 
+    /** Fjöldi trending mynda sem eru sóttar í hverju skrefi. */
     private static final int TRENDING_BATCH_SIZE = 18;
 
-    @FXML private TextField searchField;
-    @FXML private Button searchButton;
-    @FXML private Button searchTabButton;
-    @FXML private Button watchlistTabButton;
-    @FXML private Label countLabel;
-    @FXML private Label searchResultsTitle;
-    @FXML private FlowPane resultsPane;
-    @FXML private VBox watchlistPane;
-    @FXML private VBox searchView;
-    @FXML private VBox watchlistView;
-    @FXML private Label emptySearchLabel;
-    @FXML private Label emptyWatchlistLabel;
-    @FXML private StackPane overlayPane;
-    @FXML private Button closeDetailButton;
-    @FXML private Label detailTitleLabel;
-    @FXML private Label detailRatingLabel;
-    @FXML private Label detailDateLabel;
-    @FXML private Label detailRuntimeLabel;
-    @FXML private Label detailDescriptionLabel;
-    @FXML private FlowPane detailGenresPane;
-    @FXML private FlowPane detailActorsPane;
-    @FXML private ImageView detailPosterView;
-    @FXML private Button addToListButton;
-    @FXML private ScrollPane resultsScrollPane;
-    @FXML private ComboBox<String> sortComboBox;
-    @FXML private Hyperlink toggleDescriptionLink;
-    @FXML private ImageView detailBackdropView;
-    @FXML private StackPane detailModal;
-    @FXML private ScrollPane detailScrollPane;
-    @FXML private StackPane trailerContainer;
-    @FXML private VBox trailerFallbackBox;
-    @FXML private Label noTrailerLabel;
-    @FXML private Button openTrailerButton;
-    @FXML private HBox loadMoreRow;
-    @FXML private Button loadMoreButton;
-
-    private final ObservableList<Movie> searchResults = FXCollections.observableArrayList();
-    private final ObservableList<Movie> watchlist = FXCollections.observableArrayList();
-    private final TmdbService tmdbService = new TmdbService();
-    private final WatchlistStorage watchlistStorage = new WatchlistStorage();
-
-    private final List<Movie> trendingCache = new ArrayList<>();
-
-    private boolean descriptionExpanded = false;
-    private String fullDescription = "";
+    /** Hámarksfjöldi stafa sem birtist áður en lýsing er stytt. */
     private static final int DESCRIPTION_PREVIEW_LENGTH = 180;
 
-    private boolean showingTrending = true;
-    private boolean loadingTrending = false;
-    private boolean trendingHasMore = true;
-    private int nextTrendingPage = 1;
-    private int displayedTrendingCount = 0;
+    /** Leitarreitur fyrir kvikmyndir. */
+    @FXML
+    private TextField searchField;
 
+    /** Hnappur sem keyrir leit. */
+    @FXML
+    private Button searchButton;
+
+    /** Takkinn fyrir leitarskjáinn. */
+    @FXML
+    private Button searchTabButton;
+
+    /** Takkinn fyrir watchlist skjáinn. */
+    @FXML
+    private Button watchlistTabButton;
+
+    /** Merki sem sýnir fjölda vistaðra mynda. */
+    @FXML
+    private Label countLabel;
+
+    /** Fyrirsögn fyrir leitarniðurstöður eða trending lista. */
+    @FXML
+    private Label searchResultsTitle;
+
+    /** Svæði sem heldur utan um movie cards í leit. */
+    @FXML
+    private FlowPane resultsPane;
+
+    /** Svæði sem heldur utan um vistaðar myndir. */
+    @FXML
+    private VBox watchlistPane;
+
+    /** Viðmót fyrir leitarskjáinn. */
+    @FXML
+    private VBox searchView;
+
+    /** Viðmót fyrir watchlist skjáinn. */
+    @FXML
+    private VBox watchlistView;
+
+    /** Tómleikamelding á leitarskjá. */
+    @FXML
+    private Label emptySearchLabel;
+
+    /** Tómleikamelding á watchlist skjá. */
+    @FXML
+    private Label emptyWatchlistLabel;
+
+    /** Dökk yfirbreiðsla á bak við detail gluggann. */
+    @FXML
+    private StackPane overlayPane;
+
+    /** Hnappur sem lokar detail glugga. */
+    @FXML
+    private Button closeDetailButton;
+
+    /** Titill myndar í detail glugga. */
+    @FXML
+    private Label detailTitleLabel;
+
+    /** Einkunn myndar í detail glugga. */
+    @FXML
+    private Label detailRatingLabel;
+
+    /** Útgáfudagur myndar í detail glugga. */
+    @FXML
+    private Label detailDateLabel;
+
+    /** Lengd myndar í detail glugga. */
+    @FXML
+    private Label detailRuntimeLabel;
+
+    /** Lýsing myndar í detail glugga. */
+    @FXML
+    private Label detailDescriptionLabel;
+
+    /** Flæði fyrir genres chips. */
+    @FXML
+    private FlowPane detailGenresPane;
+
+    /** Flæði fyrir actors chips. */
+    @FXML
+    private FlowPane detailActorsPane;
+
+    /** Poster mynd í detail glugga. */
+    @FXML
+    private ImageView detailPosterView;
+
+    /** Hnappur til að bæta mynd á watchlist. */
+    @FXML
+    private Button addToListButton;
+
+    /** Scroll pane fyrir leitarskjá. */
+    @FXML
+    private ScrollPane detailScrollPane;
+
+    /** Drop-down til að raða watchlist. */
+    @FXML
+    private ComboBox<String> sortComboBox;
+
+    /** Link fyrir sjá meira / sjá minna á lýsingu. */
+    @FXML
+    private Hyperlink toggleDescriptionLink;
+
+    /** Backdrop mynd í detail glugga. */
+    @FXML
+    private ImageView detailBackdropView;
+
+    /** Root node fyrir detail gluggann. */
+    @FXML
+    private StackPane detailModal;
+
+    /** Texti sem segir að trailer sé ekki tiltækt. */
+    @FXML
+    private Label noTrailerLabel;
+
+    /** Hnappur sem opnar trailer í vafra. */
+    @FXML
+    private Button openTrailerButton;
+
+    /** Rað sem heldur utan um "Sjá fleiri" hnappinn. */
+    @FXML
+    private HBox loadMoreRow;
+
+    /** Hnappur til að sækja fleiri trending myndir. */
+    @FXML
+    private Button loadMoreButton;
+
+    /** Observable listi fyrir niðurstöður leitar eða trending. */
+    private final ObservableList<Movie> searchResults = FXCollections.observableArrayList();
+
+    /** Observable listi fyrir vistaðar myndir. */
+    private final ObservableList<Movie> watchlist = FXCollections.observableArrayList();
+
+    /** Þjónusta sem sækir gögn úr TMDB. */
+    private final TmdbService tmdbService = new TmdbService();
+
+    /** Þjónusta sem vistar og les watchlist. */
+    private final WatchlistStorage watchlistStorage = new WatchlistStorage();
+
+    /** Cache af sóttum trending myndum. */
+    private final List<Movie> trendingCache = new ArrayList<>();
+
+    /** Segir til um hvort lýsing í detail glugga sé útvíkkuð. */
+    private boolean descriptionExpanded;
+
+    /** Full lýsing á valinni mynd. */
+    private String fullDescription = "";
+
+    /** Segir til um hvort verið sé að sýna trending efni. */
+    private boolean showingTrending = true;
+
+    /** Segir til um hvort trending efni sé í hleðslu. */
+    private boolean loadingTrending;
+
+    /** Segir til um hvort til séu fleiri trending síður. */
+    private boolean trendingHasMore = true;
+
+    /** Næsta trending síða sem á að sækja. */
+    private int nextTrendingPage = 1;
+
+    /** Fjöldi trending mynda sem eru sýndar núna. */
+    private int displayedTrendingCount;
+
+    /** Valin mynd í detail glugga. */
     private Movie selectedMovie;
+
+    /** Slóð á YouTube trailer fyrir valda mynd. */
     private String currentTrailerUrl = "";
 
+    /**
+     * Upphafsstillir controllerinn eftir að FXML hefur verið hlaðið.
+     */
     @FXML
     private void initialize() {
-        overlayPane.setVisible(false);
-        overlayPane.setManaged(false);
-
-        clearDetailView();
-        showSearchTab();
-
-        searchButton.setOnAction(event -> searchMovies());
-        searchField.setOnAction(event -> searchMovies());
-
-        searchTabButton.setOnAction(event -> showSearchTab());
-        watchlistTabButton.setOnAction(event -> showWatchlistTab());
-
-        closeDetailButton.setOnAction(event -> closeDetail());
-        addToListButton.setOnAction(event -> addSelectedMovieToWatchlist());
-
-        overlayPane.setOnMouseClicked(event -> closeDetail());
-        detailModal.setOnMouseClicked(event -> event.consume());
-
-        toggleDescriptionLink.setOnAction(event -> toggleDescription());
-        openTrailerButton.setOnAction(event -> openCurrentTrailerInBrowser());
-        loadMoreButton.setOnAction(event -> loadMoreTrending());
-
-        sortComboBox.setItems(FXCollections.observableArrayList(
-                "Vil horfa fyrst",
-                "Kannski seinna fyrst",
-                "Búinn að horfa fyrst"
-        ));
-        sortComboBox.setValue("Vil horfa fyrst");
-        sortComboBox.setOnAction(event -> renderWatchlist());
-
-        watchlist.setAll(watchlistStorage.loadWatchlist());
-
-        watchlist.addListener((ListChangeListener<Movie>) change -> {
-            updateCountLabel();
-            renderWatchlist();
-            updateDetailButtonState();
-            saveWatchlist();
-        });
-
-        updateCountLabel();
-        renderWatchlist();
+        configureInitialState();
+        configureActions();
+        configureSortBox();
+        loadSavedWatchlist();
         showTrendingHome();
     }
 
+    /**
+     * Framkvæmir leit að kvikmynd eftir texta í leitarreit.
+     * Ef reiturinn er tómur eru trending myndir birtar aftur.
+     */
     @FXML
     private void searchMovies() {
         showSearchTab();
 
         String query = searchField.getText();
-
         if (query == null || query.isBlank()) {
             showTrendingHome();
             return;
@@ -154,11 +247,8 @@ public class MainController {
         showingTrending = false;
         loadingTrending = false;
         updateLoadMoreVisibility();
-
-        searchButton.setDisable(true);
-        searchButton.setText("...");
-        emptySearchLabel.setVisible(false);
-        emptySearchLabel.setManaged(false);
+        setSearchLoadingState(true);
+        setVisibleManaged(emptySearchLabel, false);
 
         Task<List<Movie>> task = new Task<>() {
             @Override
@@ -171,25 +261,23 @@ public class MainController {
             List<Movie> result = task.getValue();
             searchResults.setAll(result != null ? result : List.of());
             renderSearchResults();
-            searchButton.setDisable(false);
-            searchButton.setText("Leita");
+            setSearchLoadingState(false);
         });
 
         task.setOnFailed(event -> {
             searchResults.clear();
             renderSearchResults();
-            emptySearchLabel.setVisible(true);
-            emptySearchLabel.setManaged(true);
             emptySearchLabel.setText("Villa kom upp við leit.");
-            searchButton.setDisable(false);
-            searchButton.setText("Leita");
+            setVisibleManaged(emptySearchLabel, true);
+            setSearchLoadingState(false);
         });
 
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
+        startBackgroundTask(task);
     }
 
+    /**
+     * Sýnir upphafsskjá með trending myndum.
+     */
     private void showTrendingHome() {
         showSearchTab();
         showingTrending = true;
@@ -199,6 +287,9 @@ public class MainController {
         fetchTrendingUntil(TRENDING_BATCH_SIZE, true);
     }
 
+    /**
+     * Sækir næstu lotu af trending myndum.
+     */
     private void loadMoreTrending() {
         if (!showingTrending || loadingTrending) {
             return;
@@ -206,13 +297,17 @@ public class MainController {
         fetchTrendingUntil(displayedTrendingCount + TRENDING_BATCH_SIZE, false);
     }
 
+    /**
+     * Sækir trending myndir þar til markfjölda hefur verið náð.
+     *
+     * @param targetCount       markfjöldi mynda sem á að sýna
+     * @param resetToFirstBatch segir til um hvort endurstilla eigi sýndan fjölda
+     */
     private void fetchTrendingUntil(int targetCount, boolean resetToFirstBatch) {
         if ((trendingCache.size() >= targetCount || !trendingHasMore) && !loadingTrending) {
-            if (resetToFirstBatch) {
-                displayedTrendingCount = Math.min(TRENDING_BATCH_SIZE, trendingCache.size());
-            } else {
-                displayedTrendingCount = Math.min(targetCount, trendingCache.size());
-            }
+            displayedTrendingCount = resetToFirstBatch
+                    ? Math.min(TRENDING_BATCH_SIZE, trendingCache.size())
+                    : Math.min(targetCount, trendingCache.size());
             searchResults.setAll(trendingCache.subList(0, displayedTrendingCount));
             renderSearchResults();
             return;
@@ -247,14 +342,11 @@ public class MainController {
                 trendingHasMore = false;
             }
 
-            if (resetToFirstBatch) {
-                displayedTrendingCount = Math.min(TRENDING_BATCH_SIZE, trendingCache.size());
-            } else {
-                displayedTrendingCount = Math.min(targetCount, trendingCache.size());
-            }
+            displayedTrendingCount = resetToFirstBatch
+                    ? Math.min(TRENDING_BATCH_SIZE, trendingCache.size())
+                    : Math.min(targetCount, trendingCache.size());
 
             searchResults.setAll(trendingCache.subList(0, displayedTrendingCount));
-
             loadingTrending = false;
             updateLoadMoreButtonLoading(false);
             renderSearchResults();
@@ -274,79 +366,66 @@ public class MainController {
             renderSearchResults();
         });
 
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
+        startBackgroundTask(task);
     }
 
+    /**
+     * Uppfærir texta og virkni á "Sjá fleiri" hnappnum.
+     *
+     * @param isLoading true ef verið er að sækja fleiri myndir
+     */
     private void updateLoadMoreButtonLoading(boolean isLoading) {
         loadMoreButton.setDisable(isLoading);
         loadMoreButton.setText(isLoading ? "..." : "Sjá fleiri");
     }
 
+    /**
+     * Teiknar upp leitarskjáinn út frá núverandi niðurstöðum.
+     */
     private void renderSearchResults() {
         resultsPane.getChildren().clear();
-
-        if (showingTrending) {
-            searchResultsTitle.setText("Vinsælar myndir");
-        } else {
-            searchResultsTitle.setText("Leitarniðurstöður (" + searchResults.size() + ")");
-        }
+        searchResultsTitle.setText(showingTrending
+                ? "Vinsælar myndir"
+                : "Leitarniðurstöður (" + searchResults.size() + ")");
 
         if (searchResults.isEmpty()) {
-            emptySearchLabel.setVisible(true);
-            emptySearchLabel.setManaged(true);
-
-            if (showingTrending) {
-                if (loadingTrending) {
-                    emptySearchLabel.setText("Sæki vinsælar myndir...");
-                } else {
-                    emptySearchLabel.setText("Engar vinsælar myndir tiltækar núna.");
-                }
-            } else {
-                String query = searchField.getText();
-                if (query == null || query.isBlank()) {
-                    emptySearchLabel.setText("Leitaðu af kvikmynd...");
-                } else {
-                    emptySearchLabel.setText("Engar myndir fundust fyrir \"" + query + "\"");
-                }
-            }
-
+            updateEmptySearchLabel();
             updateLoadMoreVisibility();
             return;
         }
 
-        emptySearchLabel.setVisible(false);
-        emptySearchLabel.setManaged(false);
+        setVisibleManaged(emptySearchLabel, false);
 
         for (Movie movie : searchResults) {
-            MovieCard card = new MovieCard(movie, () -> openMovieDetail(movie));
-            resultsPane.getChildren().add(card);
+            resultsPane.getChildren().add(new MovieCard(movie, () -> openMovieDetail(movie)));
         }
 
         updateLoadMoreVisibility();
     }
 
+    /**
+     * Sýnir eða felur "Sjá fleiri" eftir stöðu trending birtingar.
+     */
     private void updateLoadMoreVisibility() {
         boolean showButton = showingTrending
                 && !searchResults.isEmpty()
                 && (displayedTrendingCount < trendingCache.size() || trendingHasMore);
 
-        loadMoreRow.setVisible(showButton);
-        loadMoreRow.setManaged(showButton);
+        setVisibleManaged(loadMoreRow, showButton);
     }
 
+    /**
+     * Teiknar upp watchlist skjáinn.
+     */
     private void renderWatchlist() {
         watchlistPane.getChildren().clear();
 
         if (watchlist.isEmpty()) {
-            emptyWatchlistLabel.setVisible(true);
-            emptyWatchlistLabel.setManaged(true);
+            setVisibleManaged(emptyWatchlistLabel, true);
             return;
         }
 
-        emptyWatchlistLabel.setVisible(false);
-        emptyWatchlistLabel.setManaged(false);
+        setVisibleManaged(emptyWatchlistLabel, false);
 
         List<Movie> sortedMovies = new ArrayList<>(watchlist);
         sortedMovies.sort(getWatchlistComparator());
@@ -355,11 +434,7 @@ public class MainController {
             WatchlistItem item = new WatchlistItem(
                     movie,
                     () -> deleteFromWatchlist(movie),
-                    newStatus -> {
-                        movie.setWatchStatus(newStatus);
-                        renderWatchlist();
-                        saveWatchlist();
-                    }
+                    newStatus -> updateMovieStatus(movie, newStatus)
             );
 
             item.setOnMouseClicked(event -> {
@@ -373,41 +448,26 @@ public class MainController {
         }
     }
 
+    /**
+     * Opnar nánari upplýsingar um mynd í detail glugga.
+     *
+     * @param movie myndin sem á að sýna
+     */
     private void openMovieDetail(Movie movie) {
         if (movie == null) {
             return;
         }
 
-        Movie enrichedMovie = tmdbService.enrichMovie(copyMovie(movie));
-        selectedMovie = enrichedMovie;
-
-        detailTitleLabel.setText(safeText(selectedMovie.getTitle(), "Óþekkt mynd"));
-
-        if (selectedMovie.getRating() > 0) {
-            detailRatingLabel.setText("★ %.1f/10".formatted(selectedMovie.getRating()));
-        } else {
-            detailRatingLabel.setText("★ Engin einkunn");
-        }
-
-        detailDateLabel.setText(safeText(selectedMovie.getReleaseDate(), "Óþekkt dagsetning"));
-
-        if (selectedMovie.getRuntimeMinutes() > 0) {
-            detailRuntimeLabel.setText("%d mín".formatted(selectedMovie.getRuntimeMinutes()));
-        } else {
-            detailRuntimeLabel.setText("Lengd óþekkt");
-        }
-
+        selectedMovie = tmdbService.enrichMovie(copyMovie(movie));
+        updateDetailLabels(selectedMovie);
         updateDescriptionArea(selectedMovie.getDescription());
-
         detailGenresPane.getChildren().setAll(createChipLabels(selectedMovie.getGenres()));
         detailActorsPane.getChildren().setAll(createChipLabels(selectedMovie.getActors()));
-
         setPosterImage(selectedMovie.getPosterUrl());
         setBackdropImage(selectedMovie.getBackdropUrl());
         updateTrailerArea(selectedMovie);
 
-        overlayPane.setVisible(true);
-        overlayPane.setManaged(true);
+        setVisibleManaged(overlayPane, true);
         updateDetailButtonState();
 
         if (detailScrollPane != null) {
@@ -415,42 +475,33 @@ public class MainController {
         }
     }
 
-    private void setBackdropImage(String backdropUrl) {
-        if (backdropUrl == null || backdropUrl.isBlank()) {
-            detailBackdropView.setImage(null);
-            return;
-        }
-
-        try {
-            detailBackdropView.setImage(new Image(backdropUrl, true));
-        } catch (Exception exception) {
-            detailBackdropView.setImage(null);
-        }
-    }
-
+    /**
+     * Lokar detail glugga og hreinsar upplýsingar.
+     */
     private void closeDetail() {
-        overlayPane.setVisible(false);
-        overlayPane.setManaged(false);
+        setVisibleManaged(overlayPane, false);
         selectedMovie = null;
         clearDetailView();
     }
 
+    /**
+     * Bætir valinni mynd á watchlist ef hún er ekki þar nú þegar.
+     */
     private void addSelectedMovieToWatchlist() {
-        if (selectedMovie == null) {
+        if (selectedMovie == null || isMovieSaved(selectedMovie)) {
             return;
         }
 
-        boolean alreadySaved = watchlist.stream()
-                .anyMatch(movie -> movie.getId() == selectedMovie.getId());
-
-        if (!alreadySaved) {
-            watchlist.add(copyMovie(selectedMovie));
-        }
-
+        watchlist.add(copyMovie(selectedMovie));
         updateDetailButtonState();
         closeDetail();
     }
 
+    /**
+     * Biður notanda um staðfestingu áður en mynd er eytt af watchlist.
+     *
+     * @param movie myndin sem á að eyða
+     */
     private void deleteFromWatchlist(Movie movie) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Staðfesting");
@@ -464,33 +515,37 @@ public class MainController {
         });
     }
 
+    /**
+     * Sýnir leitarskjáinn og felur watchlist skjáinn.
+     */
     private void showSearchTab() {
-        searchView.setVisible(true);
-        searchView.setManaged(true);
-
-        watchlistView.setVisible(false);
-        watchlistView.setManaged(false);
-
+        setVisibleManaged(searchView, true);
+        setVisibleManaged(watchlistView, false);
         searchTabButton.setId("activeTab");
         watchlistTabButton.setId(null);
     }
 
+    /**
+     * Sýnir watchlist skjáinn og felur leitarskjáinn.
+     */
     private void showWatchlistTab() {
-        searchView.setVisible(false);
-        searchView.setManaged(false);
-
-        watchlistView.setVisible(true);
-        watchlistView.setManaged(true);
-
+        setVisibleManaged(searchView, false);
+        setVisibleManaged(watchlistView, true);
         searchTabButton.setId(null);
         watchlistTabButton.setId("activeTab");
     }
 
+    /**
+     * Uppfærir texta sem sýnir fjölda vistaðra mynda.
+     */
     private void updateCountLabel() {
         countLabel.setText(watchlist.size() + " myndir á listanum");
         watchlistTabButton.setText("Minn listi (" + watchlist.size() + ")");
     }
 
+    /**
+     * Uppfærir stöðu og texta á takkanum sem bætir mynd á lista.
+     */
     private void updateDetailButtonState() {
         if (selectedMovie == null) {
             addToListButton.setDisable(true);
@@ -498,53 +553,59 @@ public class MainController {
             return;
         }
 
-        boolean alreadySaved = watchlist.stream()
-                .anyMatch(movie -> movie.getId() == selectedMovie.getId());
-
+        boolean alreadySaved = isMovieSaved(selectedMovie);
         addToListButton.setDisable(alreadySaved);
         addToListButton.setText(alreadySaved ? "✓ Á listanum" : "+ Bæta á lista");
     }
 
+    /**
+     * Býr til chips fyrir genre eða actors lista.
+     *
+     * @param items textagögn sem á að sýna
+     * @return listi af Label hlutum
+     */
     private List<Label> createChipLabels(List<String> items) {
         List<Label> labels = new ArrayList<>();
 
         if (items == null || items.isEmpty()) {
-            Label emptyLabel = new Label("Ótilgreint");
-            emptyLabel.getStyleClass().add("chip-label");
-            labels.add(emptyLabel);
+            labels.add(createChipLabel("Ótilgreint"));
             return labels;
         }
 
         for (String item : items) {
             if (item != null && !item.isBlank()) {
-                Label label = new Label(item);
-                label.getStyleClass().add("chip-label");
-                labels.add(label);
+                labels.add(createChipLabel(item));
             }
         }
 
         if (labels.isEmpty()) {
-            Label emptyLabel = new Label("Ótilgreint");
-            emptyLabel.getStyleClass().add("chip-label");
-            labels.add(emptyLabel);
+            labels.add(createChipLabel("Ótilgreint"));
         }
 
         return labels;
     }
 
+    /**
+     * Setur poster mynd í detail glugga.
+     *
+     * @param posterUrl slóð á poster
+     */
     private void setPosterImage(String posterUrl) {
-        if (posterUrl == null || posterUrl.isBlank()) {
-            detailPosterView.setImage(null);
-            return;
-        }
-
-        try {
-            detailPosterView.setImage(new Image(posterUrl, true));
-        } catch (Exception exception) {
-            detailPosterView.setImage(null);
-        }
+        detailPosterView.setImage(loadImageSafely(posterUrl));
     }
 
+    /**
+     * Setur backdrop mynd í detail glugga.
+     *
+     * @param backdropUrl slóð á backdrop
+     */
+    private void setBackdropImage(String backdropUrl) {
+        detailBackdropView.setImage(loadImageSafely(backdropUrl));
+    }
+
+    /**
+     * Hreinsar allt efni úr detail glugga.
+     */
     private void clearDetailView() {
         detailTitleLabel.setText("");
         detailRatingLabel.setText("");
@@ -563,22 +624,35 @@ public class MainController {
         currentTrailerUrl = "";
 
         toggleDescriptionLink.setText("");
-        toggleDescriptionLink.setVisible(false);
-        toggleDescriptionLink.setManaged(false);
+        setVisibleManaged(toggleDescriptionLink, false);
 
         noTrailerLabel.setText("Sýnishorn ekki til");
-        openTrailerButton.setVisible(false);
-        openTrailerButton.setManaged(false);
+        setVisibleManaged(openTrailerButton, false);
     }
 
+    /**
+     * Vistar watchlist í geymslu.
+     */
     private void saveWatchlist() {
         watchlistStorage.saveWatchlist(new ArrayList<>(watchlist));
     }
 
+    /**
+     * Skilar öryggistexta ef strengur er tómur eða null.
+     *
+     * @param value    strengur
+     * @param fallback sjálfgefið gildi
+     * @return value eða fallback
+     */
     private String safeText(String value, String fallback) {
-        return (value == null || value.isBlank()) ? fallback : value;
+        return value == null || value.isBlank() ? fallback : value;
     }
 
+    /**
+     * Skilar comparator fyrir watchlist út frá núverandi röðunarvali.
+     *
+     * @return comparator fyrir röðun
+     */
     private Comparator<Movie> getWatchlistComparator() {
         String selectedSort = sortComboBox.getValue();
 
@@ -593,6 +667,13 @@ public class MainController {
         return Comparator.comparingInt(movie -> getSortPriority(movie, WatchStatus.VIL_HORFA));
     }
 
+    /**
+     * Reiknar forgangsröð fyrir stöðu myndar.
+     *
+     * @param movie            myndin sem er skoðuð
+     * @param preferredStatus  staðan sem á að vera efst
+     * @return heiltala sem táknar röðunarforgang
+     */
     private int getSortPriority(Movie movie, WatchStatus preferredStatus) {
         WatchStatus status = movie.getWatchStatus();
 
@@ -611,92 +692,115 @@ public class MainController {
         return 99;
     }
 
+    /**
+     * Uppfærir lýsingu í detail glugga og ákveður hvort sýna eigi
+     * "sjá meira/minna" tengilinn.
+     *
+     * @param description lýsing myndar
+     */
     private void updateDescriptionArea(String description) {
         fullDescription = safeText(description, "Engin lýsing tiltæk.");
         descriptionExpanded = false;
 
         boolean needsToggle = fullDescription.length() > DESCRIPTION_PREVIEW_LENGTH;
+        detailDescriptionLabel.setText(needsToggle
+                ? getCollapsedDescription(fullDescription)
+                : fullDescription);
 
         if (needsToggle) {
-            detailDescriptionLabel.setText(getCollapsedDescription(fullDescription));
             toggleDescriptionLink.setText("Sjá meira");
-            toggleDescriptionLink.setVisible(true);
-            toggleDescriptionLink.setManaged(true);
+            setVisibleManaged(toggleDescriptionLink, true);
         } else {
-            detailDescriptionLabel.setText(fullDescription);
-            toggleDescriptionLink.setVisible(false);
-            toggleDescriptionLink.setManaged(false);
+            setVisibleManaged(toggleDescriptionLink, false);
         }
     }
 
+    /**
+     * Víxlar á milli stuttrar og fullrar lýsingar.
+     */
     private void toggleDescription() {
-        if (fullDescription == null || fullDescription.isBlank()) {
+        if (fullDescription.isBlank()) {
             return;
         }
 
         descriptionExpanded = !descriptionExpanded;
-
-        if (descriptionExpanded) {
-            detailDescriptionLabel.setText(fullDescription);
-            toggleDescriptionLink.setText("Sjá minna");
-        } else {
-            detailDescriptionLabel.setText(getCollapsedDescription(fullDescription));
-            toggleDescriptionLink.setText("Sjá meira");
-        }
-
+        detailDescriptionLabel.setText(descriptionExpanded
+                ? fullDescription
+                : getCollapsedDescription(fullDescription));
+        toggleDescriptionLink.setText(descriptionExpanded ? "Sjá minna" : "Sjá meira");
         resizeDetailModal();
     }
 
+    /**
+     * Skilar stytta útgáfu af lýsingu.
+     *
+     * @param text lýsing
+     * @return stytt lýsing eða fallback texti
+     */
     private String getCollapsedDescription(String text) {
         if (text == null || text.isBlank()) {
             return "Engin lýsing tiltæk.";
         }
-
         if (text.length() <= DESCRIPTION_PREVIEW_LENGTH) {
             return text;
         }
-
         return text.substring(0, DESCRIPTION_PREVIEW_LENGTH).trim() + "...";
     }
 
+    /**
+     * Uppfærir trailer svæði miðað við valda mynd.
+     *
+     * @param movie myndin sem er valin
+     */
     private void updateTrailerArea(Movie movie) {
         String trailerKey = movie.getYoutubeTrailerKey();
 
         if (trailerKey == null || trailerKey.isBlank()) {
             currentTrailerUrl = "";
             noTrailerLabel.setText("Sýnishorn ekki til");
-            openTrailerButton.setVisible(false);
-            openTrailerButton.setManaged(false);
+            setVisibleManaged(openTrailerButton, false);
             return;
         }
 
         currentTrailerUrl = "https://www.youtube.com/watch?v=" + trailerKey;
         noTrailerLabel.setText("Sýnishorn tiltækt á YouTube");
-        openTrailerButton.setVisible(true);
-        openTrailerButton.setManaged(true);
+        setVisibleManaged(openTrailerButton, true);
     }
 
+    /**
+     * Opnar núverandi trailer í sjálfgefnum vafra.
+     */
     private void openCurrentTrailerInBrowser() {
-        if (currentTrailerUrl == null || currentTrailerUrl.isBlank()) {
+        if (currentTrailerUrl.isBlank() || !Desktop.isDesktopSupported()) {
             return;
         }
 
         try {
             Desktop.getDesktop().browse(new URI(currentTrailerUrl));
         } catch (Exception exception) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Villa");
-            alert.setHeaderText("Gat ekki opnað YouTube");
-            alert.setContentText("Ekki tókst að opna sýnishornið í vafra.");
-            alert.showAndWait();
+            showErrorAlert(
+                    "Villa",
+                    "Gat ekki opnað YouTube",
+                    "Ekki tókst að opna sýnishornið í vafra."
+            );
         }
     }
 
+    /**
+     * Kallar á CSS/layout uppfærslu á detail glugga.
+     */
     private void resizeDetailModal() {
         overlayPane.applyCss();
         overlayPane.layout();
     }
 
+    /**
+     * Býr til afrit af Movie hlut svo hægt sé að vinna með hann án þess
+     * að breyta frumgögnum beint.
+     *
+     * @param source upprunaleg mynd
+     * @return afrit af mynd
+     */
     private Movie copyMovie(Movie source) {
         Movie copy = new Movie(
                 source.getId(),
@@ -714,5 +818,196 @@ public class MainController {
         copy.setBackdropUrl(source.getBackdropUrl());
         copy.setYoutubeTrailerKey(source.getYoutubeTrailerKey());
         return copy;
+    }
+
+    /**
+     * Stillir grunnstöðu á viðmóti og detail glugga.
+     */
+    private void configureInitialState() {
+        setVisibleManaged(overlayPane, false);
+        clearDetailView();
+        showSearchTab();
+        updateCountLabel();
+        renderWatchlist();
+    }
+
+    /**
+     * Tengir actions við viðmótshluta.
+     */
+    private void configureActions() {
+        searchButton.setOnAction(event -> searchMovies());
+        searchField.setOnAction(event -> searchMovies());
+        searchTabButton.setOnAction(event -> showSearchTab());
+        watchlistTabButton.setOnAction(event -> showWatchlistTab());
+        closeDetailButton.setOnAction(event -> closeDetail());
+        addToListButton.setOnAction(event -> addSelectedMovieToWatchlist());
+        toggleDescriptionLink.setOnAction(event -> toggleDescription());
+        openTrailerButton.setOnAction(event -> openCurrentTrailerInBrowser());
+        loadMoreButton.setOnAction(event -> loadMoreTrending());
+
+        overlayPane.setOnMouseClicked(event -> closeDetail());
+        detailModal.setOnMouseClicked(event -> event.consume());
+    }
+
+    /**
+     * Stillir sort combo box fyrir watchlist.
+     */
+    private void configureSortBox() {
+        sortComboBox.setItems(FXCollections.observableArrayList(
+                "Vil horfa fyrst",
+                "Kannski seinna fyrst",
+                "Búinn að horfa fyrst"
+        ));
+        sortComboBox.setValue("Vil horfa fyrst");
+        sortComboBox.setOnAction(event -> renderWatchlist());
+    }
+
+    /**
+     * Les vistaðan watchlist og tengir listener fyrir breytingar.
+     */
+    private void loadSavedWatchlist() {
+        watchlist.setAll(watchlistStorage.loadWatchlist());
+        watchlist.addListener((ListChangeListener<Movie>) change -> {
+            updateCountLabel();
+            renderWatchlist();
+            updateDetailButtonState();
+            saveWatchlist();
+        });
+    }
+
+    /**
+     * Stillir loading state á leit.
+     *
+     * @param isLoading true ef leit er í gangi
+     */
+    private void setSearchLoadingState(boolean isLoading) {
+        searchButton.setDisable(isLoading);
+        searchButton.setText(isLoading ? "..." : "Leita");
+    }
+
+    /**
+     * Ræsir JavaFX Task í daemon þræði.
+     *
+     * @param task task sem á að keyra
+     */
+    private void startBackgroundTask(Task<?> task) {
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    /**
+     * Uppfærir tómleikameldinguna á leitarskjá.
+     */
+    private void updateEmptySearchLabel() {
+        setVisibleManaged(emptySearchLabel, true);
+
+        if (showingTrending) {
+            emptySearchLabel.setText(loadingTrending
+                    ? "Sæki vinsælar myndir..."
+                    : "Engar vinsælar myndir tiltækar núna.");
+            return;
+        }
+
+        String query = searchField.getText();
+        if (query == null || query.isBlank()) {
+            emptySearchLabel.setText("Leitaðu að kvikmynd...");
+        } else {
+            emptySearchLabel.setText("Engar myndir fundust fyrir \"" + query + "\"");
+        }
+    }
+
+    /**
+     * Uppfærir stöðu myndar í watchlist.
+     *
+     * @param movie      myndin sem er uppfærð
+     * @param newStatus  ný staða
+     */
+    private void updateMovieStatus(Movie movie, WatchStatus newStatus) {
+        movie.setWatchStatus(newStatus);
+        renderWatchlist();
+        saveWatchlist();
+    }
+
+    /**
+     * Uppfærir helstu textaupplýsingar í detail glugga.
+     *
+     * @param movie myndin sem er sýnd
+     */
+    private void updateDetailLabels(Movie movie) {
+        detailTitleLabel.setText(safeText(movie.getTitle(), "Óþekkt mynd"));
+        detailRatingLabel.setText(movie.getRating() > 0
+                ? "★ %.1f/10".formatted(movie.getRating())
+                : "★ Engin einkunn");
+        detailDateLabel.setText(safeText(movie.getReleaseDate(), "Óþekkt dagsetning"));
+        detailRuntimeLabel.setText(movie.getRuntimeMinutes() > 0
+                ? "%d mín".formatted(movie.getRuntimeMinutes())
+                : "Lengd óþekkt");
+    }
+
+    /**
+     * Athugar hvort mynd sé þegar vistuð í watchlist.
+     *
+     * @param movie mynd sem á að athuga
+     * @return true ef myndin er þegar á lista
+     */
+    private boolean isMovieSaved(Movie movie) {
+        return watchlist.stream().anyMatch(savedMovie -> savedMovie.getId() == movie.getId());
+    }
+
+    /**
+     * Hleður mynd á öruggan hátt.
+     *
+     * @param imageUrl slóð á mynd
+     * @return Image eða null ef ekki tókst að hlaða
+     */
+    private Image loadImageSafely(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return null;
+        }
+
+        try {
+            return new Image(imageUrl, true);
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+
+    /**
+     * Býr til chip label með gefnum texta.
+     *
+     * @param text texti á chip
+     * @return nýtt Label
+     */
+    private Label createChipLabel(String text) {
+        Label label = new Label(text);
+        label.getStyleClass().add("chip-label");
+        return label;
+    }
+
+    /**
+     * Sýnir eða felur node og samstillir managed property.
+     *
+     * @param node    node sem á að uppfæra
+     * @param visible sýnileikastaða
+     */
+    private void setVisibleManaged(Node node, boolean visible) {
+        node.setVisible(visible);
+        node.setManaged(visible);
+    }
+
+    /**
+     * Sýnir villuglugga með skilaboðum.
+     *
+     * @param title       titill glugga
+     * @param headerText  fyrirsögn
+     * @param contentText innihald
+     */
+    private void showErrorAlert(String title, String headerText, String contentText) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(headerText);
+        alert.setContentText(contentText);
+        alert.showAndWait();
     }
 }

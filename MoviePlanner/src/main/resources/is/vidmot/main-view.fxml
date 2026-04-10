@@ -26,40 +26,42 @@
                 <Insets top="20" right="24" bottom="0" left="24"/>
             </padding>
 
-            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="top-bar">
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="top-bar">
                 <StackPane styleClass="brand-logo">
-                    <Label text="MP" styleClass="brand-logo-text"/>
+                    <Label styleClass="brand-logo-text" text="MP"/>
                 </StackPane>
 
-                <Label text="Movie Planner" styleClass="app-title"/>
+                <Label styleClass="app-title" text="Movie Planner"/>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <HBox spacing="8" alignment="CENTER_RIGHT">
-                    <Label fx:id="countLabel" styleClass="count-label" text="0 myndir á listanum"/>
+                <HBox alignment="CENTER_RIGHT" spacing="8">
+                    <Label fx:id="countLabel"
+                           styleClass="count-label"
+                           text="0 myndir á listanum"/>
                 </HBox>
             </HBox>
 
-            <HBox spacing="14" alignment="CENTER_LEFT" styleClass="search-row">
+            <HBox alignment="CENTER_LEFT" spacing="14" styleClass="search-row">
                 <TextField fx:id="searchField"
+                           styleClass="search-field"
                            promptText="Leita að kvikmynd..."
-                           HBox.hgrow="ALWAYS"
-                           styleClass="search-field"/>
+                           HBox.hgrow="ALWAYS"/>
 
                 <Button fx:id="searchButton"
-                        text="Leita"
-                        styleClass="search-button"/>
+                        styleClass="search-button"
+                        text="Leita"/>
             </HBox>
 
-            <HBox spacing="24" alignment="CENTER_LEFT" styleClass="tab-row">
+            <HBox alignment="CENTER_LEFT" spacing="24" styleClass="tab-row">
                 <Button fx:id="searchTabButton"
                         id="activeTab"
-                        text="Leit"
-                        styleClass="tab-button"/>
+                        styleClass="tab-button"
+                        text="Leit"/>
 
                 <Button fx:id="watchlistTabButton"
-                        text="Minn listi (0)"
-                        styleClass="tab-button"/>
+                        styleClass="tab-button"
+                        text="Minn listi (0)"/>
             </HBox>
         </VBox>
     </top>
@@ -82,17 +84,17 @@
                        managed="false"/>
 
                 <ScrollPane fx:id="resultsScrollPane"
+                            styleClass="results-scroll-pane"
                             fitToWidth="true"
                             fitToHeight="false"
                             hbarPolicy="NEVER"
-                            vbarPolicy="AS_NEEDED"
-                            styleClass="results-scroll-pane">
+                            vbarPolicy="AS_NEEDED">
                     <content>
                         <FlowPane fx:id="resultsPane"
+                                  styleClass="results-pane"
                                   hgap="18"
                                   vgap="18"
-                                  prefWrapLength="1180"
-                                  styleClass="results-pane"/>
+                                  prefWrapLength="1180"/>
                     </content>
                 </ScrollPane>
 
@@ -101,8 +103,8 @@
                       visible="false"
                       managed="false">
                     <Button fx:id="loadMoreButton"
-                            text="Sjá fleiri"
-                            styleClass="load-more-button"/>
+                            styleClass="load-more-button"
+                            text="Sjá fleiri"/>
                 </HBox>
             </VBox>
 
@@ -113,11 +115,11 @@
 
                 <Label styleClass="section-title" text="Minn listi"/>
 
-                <HBox spacing="12" alignment="CENTER_LEFT">
-                    <Label text="Raða eftir" styleClass="sort-label"/>
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <Label styleClass="sort-label" text="Raða eftir"/>
                     <ComboBox fx:id="sortComboBox"
-                              prefWidth="220"
-                              styleClass="sort-combo"/>
+                              styleClass="sort-combo"
+                              prefWidth="220"/>
                 </HBox>
 
                 <Label fx:id="emptyWatchlistLabel"
@@ -128,52 +130,50 @@
             </VBox>
 
             <StackPane fx:id="overlayPane"
+                       styleClass="overlay-root"
                        visible="false"
-                       managed="false"
-                       styleClass="overlay-root">
+                       managed="false">
 
                 <StackPane fx:id="detailModal"
-                           maxWidth="980"
-                           styleClass="detail-modal">
+                           styleClass="detail-modal"
+                           maxWidth="980">
 
                     <VBox spacing="0" fillWidth="true" prefWidth="980">
-
                         <HBox alignment="CENTER_RIGHT" styleClass="modal-header">
                             <Button fx:id="closeDetailButton"
-                                    text="✕"
-                                    styleClass="close-button"/>
+                                    styleClass="close-button"
+                                    text="✕"/>
                         </HBox>
 
                         <StackPane prefHeight="240" styleClass="detail-backdrop">
                             <ImageView fx:id="detailBackdropView"
+                                       styleClass="detail-backdrop-image"
                                        fitWidth="980"
                                        fitHeight="240"
                                        preserveRatio="false"
-                                       pickOnBounds="true"
-                                       styleClass="detail-backdrop-image"/>
+                                       pickOnBounds="true"/>
                             <StackPane styleClass="detail-backdrop-overlay"/>
                         </StackPane>
 
                         <ScrollPane fx:id="detailScrollPane"
+                                    styleClass="detail-scroll"
                                     fitToWidth="true"
                                     hbarPolicy="NEVER"
-                                    vbarPolicy="AS_NEEDED"
-                                    styleClass="detail-scroll">
+                                    vbarPolicy="AS_NEEDED">
                             <content>
                                 <VBox spacing="0">
-
-                                    <HBox spacing="26" alignment="TOP_LEFT" styleClass="detail-body">
+                                    <HBox alignment="TOP_LEFT" spacing="26" styleClass="detail-body">
                                         <ImageView fx:id="detailPosterView"
+                                                   styleClass="detail-poster"
                                                    fitWidth="180"
                                                    fitHeight="270"
-                                                   preserveRatio="false"
-                                                   styleClass="detail-poster"/>
+                                                   preserveRatio="false"/>
 
                                         <VBox spacing="16" HBox.hgrow="ALWAYS">
                                             <Label fx:id="detailTitleLabel"
                                                    styleClass="detail-title"/>
 
-                                            <HBox spacing="16" alignment="CENTER_LEFT">
+                                            <HBox alignment="CENTER_LEFT" spacing="16">
                                                 <Label fx:id="detailRatingLabel"
                                                        styleClass="detail-meta-rating"/>
 
@@ -184,27 +184,31 @@
                                                        styleClass="detail-meta"/>
                                             </HBox>
 
-                                            <FlowPane fx:id="detailGenresPane" hgap="8" vgap="8"/>
+                                            <FlowPane fx:id="detailGenresPane"
+                                                      hgap="8"
+                                                      vgap="8"/>
 
                                             <Button fx:id="addToListButton"
-                                                    text="+ Bæta á lista"
-                                                    styleClass="add-button"/>
+                                                    styleClass="add-button"
+                                                    text="+ Bæta á lista"/>
 
                                             <VBox spacing="10">
-                                                <Label text="Lýsing" styleClass="subheading"/>
+                                                <Label styleClass="subheading" text="Lýsing"/>
                                                 <Label fx:id="detailDescriptionLabel"
-                                                       wrapText="true"
-                                                       styleClass="detail-description"/>
+                                                       styleClass="detail-description"
+                                                       wrapText="true"/>
                                                 <Hyperlink fx:id="toggleDescriptionLink"
+                                                           styleClass="description-link"
                                                            text=""
                                                            visible="false"
-                                                           managed="false"
-                                                           styleClass="description-link"/>
+                                                           managed="false"/>
                                             </VBox>
 
                                             <VBox spacing="12">
-                                                <Label text="Aðalleikarar" styleClass="subheading"/>
-                                                <FlowPane fx:id="detailActorsPane" hgap="8" vgap="8"/>
+                                                <Label styleClass="subheading" text="Aðalleikarar"/>
+                                                <FlowPane fx:id="detailActorsPane"
+                                                          hgap="8"
+                                                          vgap="8"/>
                                             </VBox>
                                         </VBox>
                                     </HBox>
@@ -212,27 +216,27 @@
                                     <VBox spacing="12" styleClass="trailer-section">
                                         <StackPane alignment="CENTER" styleClass="trailer-center-wrap">
                                             <StackPane fx:id="trailerContainer"
+                                                       styleClass="trailer-container"
                                                        prefHeight="220"
                                                        minHeight="220"
-                                                       maxWidth="720"
-                                                       styleClass="trailer-container">
+                                                       maxWidth="720">
                                                 <VBox fx:id="trailerFallbackBox"
                                                       alignment="CENTER"
                                                       spacing="14"
                                                       styleClass="trailer-fallback-box">
                                                     <Label fx:id="noTrailerLabel"
-                                                           text="Sýnishorn ekki til"
-                                                           styleClass="trailer-empty"/>
+                                                           styleClass="trailer-empty"
+                                                           text="Sýnishorn ekki til"/>
+
                                                     <Button fx:id="openTrailerButton"
+                                                            styleClass="trailer-button"
                                                             text="Horfa á YouTube"
                                                             visible="false"
-                                                            managed="false"
-                                                            styleClass="trailer-button"/>
+                                                            managed="false"/>
                                                 </VBox>
                                             </StackPane>
                                         </StackPane>
                                     </VBox>
-
                                 </VBox>
                             </content>
                         </ScrollPane>

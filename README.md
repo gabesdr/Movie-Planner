@@ -18,8 +18,10 @@
 
 ---
 
-**Keyrsla**
-Nota IntelliJ, VSCode, eða Terminal
+##Keyrsla
+
+Það er hægt að keyra forritið gegnum IntelliJ, VSCode eða Terminal.
+
 ```bash
 mvn javafx:run
 ```

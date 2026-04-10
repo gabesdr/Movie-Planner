@@ -38,7 +38,7 @@ Ræsir JavaFX forritið beint í þróunarumhverfi.
 
 ---
 
-## Háðar einingar
+## Pakkar
 
 | Pakki | Útgáfa | Tilgangur |
 |---|---|---|

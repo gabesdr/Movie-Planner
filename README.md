@@ -44,4 +44,4 @@ Ræsir JavaFX forritið beint í þróunarumhverfi.
 |---|---|---|
 | `javafx-controls` & `javafx-fxml` | 21.0.6 | UI framework — gluggar, skipulag og stýringar |
 | `jackson-core` / `databind` / `annotations` | 2.17.1 | JSON lestur og skrift |
-| `junit-jupiter-api` & `engine` *(test)* | 5.12.1 | Einingaprófanir — ekki með í lokaútgáfu |
+| `junit-jupiter-api` & `engine` *(test)* | 5.12.1 | Einingaprófanir |

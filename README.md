@@ -23,6 +23,10 @@
 Það er hægt að keyra forritið gegnum IntelliJ, VSCode eða Terminal.
 
 ```bash
+mvn clean
+
+mvn compile
+
 mvn javafx:run
 ```
 Ræsir JavaFX forritið beint í þróunarumhverfi.

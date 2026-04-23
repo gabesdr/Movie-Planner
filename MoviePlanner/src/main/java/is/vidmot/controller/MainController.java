@@ -6,6 +6,7 @@ import is.vinnsla.WatchStatus;
 import is.vinnsla.WatchlistStorage;
 import is.vidmot.view.MovieCard;
 import is.vidmot.view.WatchlistItem;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -140,9 +141,13 @@ public class MainController {
     @FXML
     private Button addToListButton;
 
-    /** Scroll pane fyrir leitarskjá. */
+    /** Scroll pane fyrir detail glugga. */
     @FXML
     private ScrollPane detailScrollPane;
+
+    /** Scroll pane fyrir watchlist skjá. */
+    @FXML
+    private ScrollPane watchlistScrollPane;
 
     /** Drop-down til að raða watchlist. */
     @FXML
@@ -226,6 +231,7 @@ public class MainController {
         configureInitialState();
         configureActions();
         configureSortBox();
+        bindDetailModalSize();
         loadSavedWatchlist();
         showTrendingHome();
     }
@@ -300,7 +306,7 @@ public class MainController {
     /**
      * Sækir trending myndir þar til markfjölda hefur verið náð.
      *
-     * @param targetCount       markfjöldi mynda sem á að sýna
+     * @param targetCount markfjöldi mynda sem á að sýna
      * @param resetToFirstBatch segir til um hvort endurstilla eigi sýndan fjölda
      */
     private void fetchTrendingUntil(int targetCount, boolean resetToFirstBatch) {
@@ -422,10 +428,13 @@ public class MainController {
 
         if (watchlist.isEmpty()) {
             setVisibleManaged(emptyWatchlistLabel, true);
+            setVisibleManaged(watchlistScrollPane, false);
             return;
         }
 
         setVisibleManaged(emptyWatchlistLabel, false);
+        setVisibleManaged(watchlistScrollPane, true);
+        watchlistScrollPane.setVvalue(0);
 
         List<Movie> sortedMovies = new ArrayList<>(watchlist);
         sortedMovies.sort(getWatchlistComparator());
@@ -438,9 +447,10 @@ public class MainController {
             );
 
             item.setOnMouseClicked(event -> {
-                if (event.getButton() == MouseButton.PRIMARY) {
-                    openMovieDetail(movie);
+                if (event.getButton() != MouseButton.PRIMARY || isInteractiveTarget(event.getTarget())) {
+                    return;
                 }
+                openMovieDetail(movie);
             });
 
             VBox.setMargin(item, new Insets(0, 0, 16, 0));
@@ -473,6 +483,8 @@ public class MainController {
         if (detailScrollPane != null) {
             detailScrollPane.setVvalue(0);
         }
+
+        resizeDetailModal();
     }
 
     /**
@@ -521,8 +533,7 @@ public class MainController {
     private void showSearchTab() {
         setVisibleManaged(searchView, true);
         setVisibleManaged(watchlistView, false);
-        searchTabButton.setId("activeTab");
-        watchlistTabButton.setId(null);
+        updateTabIndicator(true);
     }
 
     /**
@@ -531,8 +542,8 @@ public class MainController {
     private void showWatchlistTab() {
         setVisibleManaged(searchView, false);
         setVisibleManaged(watchlistView, true);
-        searchTabButton.setId(null);
-        watchlistTabButton.setId("activeTab");
+        renderWatchlist();
+        updateTabIndicator(false);
     }
 
     /**
@@ -640,7 +651,7 @@ public class MainController {
     /**
      * Skilar öryggistexta ef strengur er tómur eða null.
      *
-     * @param value    strengur
+     * @param value strengur
      * @param fallback sjálfgefið gildi
      * @return value eða fallback
      */
@@ -670,8 +681,8 @@ public class MainController {
     /**
      * Reiknar forgangsröð fyrir stöðu myndar.
      *
-     * @param movie            myndin sem er skoðuð
-     * @param preferredStatus  staðan sem á að vera efst
+     * @param movie myndin sem er skoðuð
+     * @param preferredStatus staðan sem á að vera efst
      * @return heiltala sem táknar röðunarforgang
      */
     private int getSortPriority(Movie movie, WatchStatus preferredStatus) {
@@ -827,8 +838,6 @@ public class MainController {
         setVisibleManaged(overlayPane, false);
         clearDetailView();
         showSearchTab();
-        updateCountLabel();
-        renderWatchlist();
     }
 
     /**
@@ -873,6 +882,33 @@ public class MainController {
             updateDetailButtonState();
             saveWatchlist();
         });
+
+        updateCountLabel();
+        renderWatchlist();
+    }
+
+    /**
+     * Bindur detail gluggann við hæð gluggans en heldur breiddinni stöðugri.
+     */
+    private void bindDetailModalSize() {
+        if (overlayPane == null || detailModal == null) {
+            return;
+        }
+
+        detailModal.setPrefWidth(980);
+        detailModal.setMaxWidth(980);
+
+        detailModal.prefHeightProperty().bind(Bindings.max(420, overlayPane.heightProperty().subtract(80)));
+        detailModal.maxHeightProperty().bind(Bindings.max(420, overlayPane.heightProperty().subtract(80)));
+
+        if (!detailModal.getChildren().isEmpty() && detailModal.getChildren().get(0) instanceof VBox modalContent) {
+            modalContent.prefWidthProperty().bind(detailModal.widthProperty());
+            modalContent.prefHeightProperty().bind(detailModal.heightProperty());
+        }
+
+        if (detailBackdropView != null) {
+            detailBackdropView.setFitWidth(980);
+        }
     }
 
     /**
@@ -920,8 +956,8 @@ public class MainController {
     /**
      * Uppfærir stöðu myndar í watchlist.
      *
-     * @param movie      myndin sem er uppfærð
-     * @param newStatus  ný staða
+     * @param movie myndin sem er uppfærð
+     * @param newStatus ný staða
      */
     private void updateMovieStatus(Movie movie, WatchStatus newStatus) {
         movie.setWatchStatus(newStatus);
@@ -988,19 +1024,53 @@ public class MainController {
     /**
      * Sýnir eða felur node og samstillir managed property.
      *
-     * @param node    node sem á að uppfæra
+     * @param node node sem á að uppfæra
      * @param visible sýnileikastaða
      */
     private void setVisibleManaged(Node node, boolean visible) {
+        if (node == null) {
+            return;
+        }
         node.setVisible(visible);
         node.setManaged(visible);
     }
 
     /**
+     * Uppfærir hvaða tab er virkt.
+     *
+     * @param searchActive true ef leitartab á að vera virkt
+     */
+    private void updateTabIndicator(boolean searchActive) {
+        searchTabButton.setId(searchActive ? "activeTab" : null);
+        watchlistTabButton.setId(searchActive ? null : "activeTab");
+    }
+
+    /**
+     * Athugar hvort smellt hafi verið á gagnvirkan undirhlut innan watchlist items.
+     *
+     * @param target event target
+     * @return true ef target er inni í button/dropdown/link
+     */
+    private boolean isInteractiveTarget(Object target) {
+        if (!(target instanceof Node node)) {
+            return false;
+        }
+
+        Node current = node;
+        while (current != null) {
+            if (current instanceof Button || current instanceof ComboBox<?> || current instanceof Hyperlink) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
+    }
+
+    /**
      * Sýnir villuglugga með skilaboðum.
      *
-     * @param title       titill glugga
-     * @param headerText  fyrirsögn
+     * @param title titill glugga
+     * @param headerText fyrirsögn
      * @param contentText innihald
      */
     private void showErrorAlert(String title, String headerText, String contentText) {

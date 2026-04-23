@@ -84,6 +84,7 @@
                        managed="false"/>
 
                 <ScrollPane fx:id="resultsScrollPane"
+                            VBox.vgrow="ALWAYS"
                             styleClass="results-scroll-pane"
                             fitToWidth="true"
                             fitToHeight="false"
@@ -108,25 +109,43 @@
                 </HBox>
             </VBox>
 
-            <VBox fx:id="watchlistView" spacing="22" visible="false" managed="false">
+            <VBox fx:id="watchlistView"
+                  spacing="22"
+                  visible="false"
+                  managed="false"
+                  maxWidth="Infinity"
+                  maxHeight="Infinity">
                 <padding>
                     <Insets top="20" right="24" bottom="24" left="24"/>
                 </padding>
 
                 <Label styleClass="section-title" text="Minn listi"/>
 
-                <HBox alignment="CENTER_LEFT" spacing="12">
-                    <Label styleClass="sort-label" text="Raða eftir"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Label text="Raða eftir" styleClass="sort-label"/>
                     <ComboBox fx:id="sortComboBox"
-                              styleClass="sort-combo"
-                              prefWidth="220"/>
+                              prefWidth="220"
+                              styleClass="sort-combo"/>
                 </HBox>
 
                 <Label fx:id="emptyWatchlistLabel"
                        styleClass="empty-label"
                        text="Listinn þinn er tómur. Leitaðu að kvikmyndum og bættu þeim við!"/>
 
-                <VBox fx:id="watchlistPane" fillWidth="true" spacing="16"/>
+                <ScrollPane fx:id="watchlistScrollPane"
+                            fitToWidth="true"
+                            fitToHeight="true"
+                            hbarPolicy="NEVER"
+                            vbarPolicy="AS_NEEDED"
+                            VBox.vgrow="ALWAYS"
+                            styleClass="watchlist-scroll-pane">
+                    <content>
+                        <VBox fx:id="watchlistPane"
+                              fillWidth="true"
+                              spacing="16"
+                              styleClass="watchlist-pane"/>
+                    </content>
+                </ScrollPane>
             </VBox>
 
             <StackPane fx:id="overlayPane"
@@ -136,7 +155,8 @@
 
                 <StackPane fx:id="detailModal"
                            styleClass="detail-modal"
-                           maxWidth="980">
+                           maxWidth="1400"
+                           maxHeight="900">
 
                     <VBox spacing="0" fillWidth="true" prefWidth="980">
                         <HBox alignment="CENTER_RIGHT" styleClass="modal-header">

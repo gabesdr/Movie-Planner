@@ -1,18 +1,4 @@
 [ {
-  "id" : 27205,
-  "title" : "Inception",
-  "posterUrl" : "https://image.tmdb.org/t/p/w500/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg",
-  "description" : "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: \"inception\", the implantation of another person's idea into a target's subconscious.",
-  "rating" : 8.371,
-  "year" : 2010,
-  "releaseDate" : "2010-07-15",
-  "runtimeMinutes" : 148,
-  "genres" : [ "Action", "Science Fiction", "Adventure" ],
-  "actors" : [ "Leonardo DiCaprio", "Joseph Gordon-Levitt", "Ken Watanabe", "Tom Hardy" ],
-  "watchStatus" : "KANNSKI_SEINNA",
-  "backdropUrl" : "https://image.tmdb.org/t/p/w500/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg",
-  "youtubeTrailerKey" : "JE9z-gy4De4"
-}, {
   "id" : 157336,
   "title" : "Interstellar",
   "posterUrl" : "https://image.tmdb.org/t/p/w500/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg",
@@ -41,20 +27,6 @@
   "backdropUrl" : "https://image.tmdb.org/t/p/w500/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg",
   "youtubeTrailerKey" : "tGpTpVyI_OQ"
 }, {
-  "id" : 1226863,
-  "title" : "The Super Mario Galaxy Movie",
-  "posterUrl" : "https://image.tmdb.org/t/p/w500/eJGWx219ZcEMVQJhAgMiqo8tYY.jpg",
-  "description" : "Having thwarted Bowser's previous plot to marry Princess Peach, Mario and Luigi now face a fresh threat in Bowser Jr., who is determined to liberate his father from captivity and restore the family legacy. Alongside companions new and old, the brothers travel across the stars to stop the young heir's crusade.",
-  "rating" : 6.9,
-  "year" : 2026,
-  "releaseDate" : "2026-04-01",
-  "runtimeMinutes" : 98,
-  "genres" : [ "Family", "Comedy", "Adventure" ],
-  "actors" : [ "Chris Pratt", "Charlie Day", "Anya Taylor-Joy", "Jack Black" ],
-  "watchStatus" : "VIL_HORFA",
-  "backdropUrl" : "https://image.tmdb.org/t/p/w500/kxQiIJ4gVcD3K6o14MJ72p5yRcE.jpg",
-  "youtubeTrailerKey" : "En5QZmL5R1s"
-}, {
   "id" : 83533,
   "title" : "Avatar: Fire and Ash",
   "posterUrl" : "https://image.tmdb.org/t/p/w500/bRBeSHfGHwkEpImlhxPmOcUsaeg.jpg",
@@ -69,17 +41,59 @@
   "backdropUrl" : "https://image.tmdb.org/t/p/w500/iN41Ccw4DctL8npfmYg1j5Tr1eb.jpg",
   "youtubeTrailerKey" : "Ma1x7ikpid8"
 }, {
+  "id" : 1049471,
+  "title" : "Outcome",
+  "posterUrl" : "https://image.tmdb.org/t/p/w500/kSzcpfbTy2pXHGvrVU2WhQTo6oU.jpg",
+  "description" : "Reef Hawk, Hollywood's poster child since age six, is not okay. When he learns about an extortion plot tied to a mysterious video, Reef preemptively sets out on a redemption tour to make amends, confront his demons, and avoid getting canceled.",
+  "rating" : 5.314,
+  "year" : 2026,
+  "releaseDate" : "2026-04-06",
+  "runtimeMinutes" : 84,
+  "genres" : [ "Comedy", "Drama" ],
+  "actors" : [ "Keanu Reeves", "Jonah Hill", "Cameron Diaz", "Matt Bomer" ],
+  "watchStatus" : "VIL_HORFA",
+  "backdropUrl" : "https://image.tmdb.org/t/p/w500/avwIERZtWiWa34qShf5biDzAVaF.jpg",
+  "youtubeTrailerKey" : "NQQqInahTAM"
+}, {
+  "id" : 1226863,
+  "title" : "The Super Mario Galaxy Movie",
+  "posterUrl" : "https://image.tmdb.org/t/p/w500/eJGWx219ZcEMVQJhAgMiqo8tYY.jpg",
+  "description" : "Having thwarted Bowser's previous plot to marry Princess Peach, Mario and Luigi now face a fresh threat in Bowser Jr., who is determined to liberate his father from captivity and restore the family legacy. Alongside companions new and old, the brothers travel across the stars to stop the young heir's crusade.",
+  "rating" : 6.8,
+  "year" : 2026,
+  "releaseDate" : "2026-04-01",
+  "runtimeMinutes" : 98,
+  "genres" : [ "Family", "Comedy", "Adventure" ],
+  "actors" : [ "Chris Pratt", "Charlie Day", "Anya Taylor-Joy", "Jack Black" ],
+  "watchStatus" : "VIL_HORFA",
+  "backdropUrl" : "https://image.tmdb.org/t/p/w500/9Z2uDYXqJrlmePznQQJhL6d92Rq.jpg",
+  "youtubeTrailerKey" : "En5QZmL5R1s"
+}, {
+  "id" : 1290417,
+  "title" : "Thrash",
+  "posterUrl" : "https://image.tmdb.org/t/p/w500/adk8weka3O5648g3de4z3y4aE7G.jpg",
+  "description" : "When a Category 5 hurricane decimates a coastal town, the storm surge brings devastation, chaos, and something far more frightening onto shore: hungry sharks.",
+  "rating" : 5.924,
+  "year" : 2026,
+  "releaseDate" : "2026-04-10",
+  "runtimeMinutes" : 84,
+  "genres" : [ "Horror", "Thriller" ],
+  "actors" : [ "Phoebe Dynevor", "Whitney Peak", "Djimon Hounsou", "Matt Nable" ],
+  "watchStatus" : "VIL_HORFA",
+  "backdropUrl" : "https://image.tmdb.org/t/p/w500/3ooXDVaz4xHKtwe4lkmF1gNopOC.jpg",
+  "youtubeTrailerKey" : "hzyOsNyDkbM"
+}, {
   "id" : 1159559,
   "title" : "Scream 7",
   "posterUrl" : "https://image.tmdb.org/t/p/w500/jjyuk0edLiW8vOSnlfwWCCLpbh5.jpg",
   "description" : "When a new Ghostface killer emerges in the quiet town where Sidney Prescott has built a new life, her darkest fears are realized as her daughter becomes the next target. Determined to protect her family, Sidney must face the horrors of her past to put an end to the bloodshed once and for all.",
-  "rating" : 6.043,
+  "rating" : 6.059,
   "year" : 2026,
   "releaseDate" : "2026-02-25",
   "runtimeMinutes" : 114,
   "genres" : [ "Horror", "Mystery", "Crime" ],
   "actors" : [ "Neve Campbell", "Courteney Cox", "Isabel May", "Jasmin Savoy Brown" ],
   "watchStatus" : "VIL_HORFA",
-  "backdropUrl" : "https://image.tmdb.org/t/p/w500/hz7TdCrpLLt2Dz7S3PS2HG9rpAO.jpg",
+  "backdropUrl" : "https://image.tmdb.org/t/p/w500/t9J2HXaDuJR7bvIG9XF7mttn4VY.jpg",
   "youtubeTrailerKey" : "4g8OciWNJn4"
 } ]

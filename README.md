@@ -18,7 +18,7 @@
 
 ---
 
-##Keyrsla
+## Keyrsla
 
 Það er hægt að keyra forritið gegnum IntelliJ, VSCode eða Terminal.
 
